@@ -15,15 +15,22 @@
 #define LED_ROJO 7
 #define LED_VERDE 8
 
+// Numero maximo de turnos por partido
 #define MAX_TURN 3
+// Numero de colores en la secuencia inicial
 #define INITIAL_SEQUENCE_LENGTH 3
+// Numero maximo de colores en la secuencia
 const int MAX_SEQUENCE_LENGTH = MAX_TURN + INITIAL_SEQUENCE_LENGTH - 1;
 
+// Turno actual
 int currentTurn = 0;
+// Comprueba si se ha iniciado el juego
 boolean started = false;
 
+// Array con la secuencia de colores
 int values[MAX_SEQUENCE_LENGTH];
 
+// Funcion para resetear la placa de arduino
 void (* reset) (void) = 0;
 
 void setup() {
@@ -36,6 +43,7 @@ void setup() {
   pinMode(LED_ROJO, OUTPUT);
   pinMode(LED_VERDE, OUTPUT);
 
+  // Se inicializan los valores de la secuencia a -1
   for(int i = 0; i < MAX_SEQUENCE_LENGTH; i++)
   {
     values[i] = -1;
@@ -43,6 +51,7 @@ void setup() {
 }
 
 void loop() {
+  // Si se ha llegado al maximo numero de turnos, el jugador habra ganado
   if(currentTurn == MAX_TURN)
   {
     winSequence();
@@ -50,9 +59,13 @@ void loop() {
   }
 
   if(started && digitalRead(PULSADOR_VERDE) == LOW && digitalRead(PULSADOR_ROJO) == LOW) {
+    // Genera la secuencia para el turno actual
     generateSequence(currentTurn);
+    // Muestra dicha secuencia
     displaySequence();
+    // Espera por la interaccion del usuario
     handleUserInteraction();
+    // Se continua al siguiente turno
     currentTurn++;
 
     for(int i = 0; i < MAX_SEQUENCE_LENGTH; i++)
@@ -71,6 +84,7 @@ void displaySequence()
 {
   for (int i = 0; i < MAX_SEQUENCE_LENGTH; i++)
   {
+    // Si el valor de la secuencia es -1, se ha terminado la secuencia para el turno actual
     if (values[i] == -1) break;
 
     digitalWrite(LED_ROJO, LOW);
@@ -96,24 +110,30 @@ void generateSequence(int turn)
 {
   for (int i = 0; i < INITIAL_SEQUENCE_LENGTH + currentTurn; i++)
   {
+    // Si ya habia un numero asignado permanece
     if(values[i] != -1) continue;
+    // En caso contrario se añaden numeros a la secuencia anterior
     if(i < INITIAL_SEQUENCE_LENGTH + turn) values[i] = random(ROJO, VERDE + 1);
   }
 }
 
 void handleUserInteraction()
 {
+  // Boton presionado por el usuario
   int buttonPressed = -1;
+  // Color de la secuencia actual
   int sequenceIndex = 0;
 
   while (sequenceIndex < INITIAL_SEQUENCE_LENGTH + currentTurn)
   {
     if(buttonPressed != -1 && digitalRead(PULSADOR_ROJO) == LOW && digitalRead(PULSADOR_VERDE) == LOW) {
+      // Se comprueba si el boton pulsado es el correcto
       if(values[sequenceIndex] == buttonPressed)
       {
         sequenceIndex++;
         buttonPressed = -1;
       }
+      // Si no es correcta, se pierde y se reinicia el juego
       else
       {
         loseSequence();
@@ -121,6 +141,7 @@ void handleUserInteraction()
       }
     }
 
+    // Se guarda el boton presionado por el usuario
     if(buttonPressed == -1 && (digitalRead(PULSADOR_ROJO) == HIGH || digitalRead(PULSADOR_VERDE) == HIGH)) {
       buttonPressed = digitalRead(PULSADOR_ROJO) == HIGH ? ROJO : VERDE;
       const int led = buttonPressed == ROJO ? LED_ROJO : LED_VERDE;
@@ -168,4 +189,3 @@ void winSequence()
   digitalWrite(LED_ROJO, LOW);
   digitalWrite(LED_VERDE, LOW);
 }
-

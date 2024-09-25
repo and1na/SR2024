@@ -12,7 +12,7 @@
 #define LED2 5
 #define LED3 6
 
-boolean pulsado;
+boolean pulsado = false;
 
 void setup() {
   pinMode(PULSADOR, INPUT);
@@ -21,9 +21,7 @@ void setup() {
   pinMode(LED3, OUTPUT);
   
   Serial.begin(9600);
-
   randomSeed(analogRead(0));
-  pulsado = false;
 
   Serial.println("[+] Inicio");
 }
