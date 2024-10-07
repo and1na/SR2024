@@ -28,45 +28,50 @@ unsigned long pressedTime;
 
 void setup()
 {
-    pinMode(RED_LED, OUTPUT);
-    pinMode(GREEN_LED, OUTPUT);
+  pinMode(RED_LED, OUTPUT);
+  pinMode(GREEN_LED, OUTPUT);
 
-    pinMode(COLUMN_1, INPUT);
-    pinMode(COLUMN_2, INPUT);
-    pinMode(COLUMN_3, INPUT);
-    pinMode(COLUMN_4, INPUT);
+  pinMode(COLUMN_1, INPUT);
+  pinMode(COLUMN_2, INPUT);
+  pinMode(COLUMN_3, INPUT);
+  pinMode(COLUMN_4, INPUT);
 
-    pinMode(ROW_1, INPUT);
-    pinMode(ROW_2, INPUT);
-    pinMode(ROW_3, INPUT);
-    pinMode(ROW_4, INPUT);
+  pinMode(ROW_1, INPUT);
+  pinMode(ROW_2, INPUT);
+  pinMode(ROW_3, INPUT);
+  pinMode(ROW_4, INPUT);
 
-    keypad.begin();
-    pressedTime = 0;
+  keypad.begin();
+  pressedTime = 0;
 
-    digitalWrite(RED_LED, LOW);
-    digitalWrite(GREEN_LED, HIGH);
+  close();
 }
 
 void loop()
 {
-    keypad.scan();
-    const char value = keypad.readAscii();
+  keypad.scan();
+  const char value = keypad.readAscii();
 
-    if(value == 'A')
-        pressedTime = millis();
+  if(value == 'A')
+    pressedTime = millis();
 
-    if(value == 'C' || (millis() - pressedTime >= 5000 && pressedTime != 0))
-        pressedTime = 0;
+  if(value == 'C' || (millis() - pressedTime >= 5000 && pressedTime != 0))
+    pressedTime = 0;
 
-    if (pressedTime != 0)
-    {
-        digitalWrite(RED_LED, HIGH);
-        digitalWrite(GREEN_LED, LOW);
-    }
-    else
-    {
-        digitalWrite(RED_LED, LOW);
-        digitalWrite(GREEN_LED, HIGH);
-    }
+  if (pressedTime != 0)
+    open();
+  else
+    close();
+}
+
+void open()
+{
+  digitalWrite(RED_LED, HIGH);
+  digitalWrite(GREEN_LED, LOW);
+}
+
+void close()
+{
+  digitalWrite(RED_LED, LOW);
+  digitalWrite(GREEN_LED, HIGH);
 }

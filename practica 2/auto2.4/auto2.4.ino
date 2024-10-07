@@ -32,104 +32,112 @@ Keypad keypad(COLUMN_1, COLUMN_2, COLUMN_3, COLUMN_4, ROW_1, ROW_2, ROW_3, ROW_4
 
 unsigned long pressedTime = 0;
 int keysPressed = 0;
-String password = String();
+String password = "";
 
 void setup()
 {
-    pinMode(RED_LED, OUTPUT);
-    pinMode(GREEN_LED, OUTPUT);
+  pinMode(RED_LED, OUTPUT);
+  pinMode(GREEN_LED, OUTPUT);
 
-    pinMode(COLUMN_1, INPUT);
-    pinMode(COLUMN_2, INPUT);
-    pinMode(COLUMN_3, INPUT);
-    pinMode(COLUMN_4, INPUT);
+  pinMode(COLUMN_1, INPUT);
+  pinMode(COLUMN_2, INPUT);
+  pinMode(COLUMN_3, INPUT);
+  pinMode(COLUMN_4, INPUT);
 
-    pinMode(ROW_1, INPUT);
-    pinMode(ROW_2, INPUT);
-    pinMode(ROW_3, INPUT);
-    pinMode(ROW_4, INPUT);
+  pinMode(ROW_1, INPUT);
+  pinMode(ROW_2, INPUT);
+  pinMode(ROW_3, INPUT);
+  pinMode(ROW_4, INPUT);
 
-    pinMode(ULTRASONIC_ECHO, INPUT);
-    pinMode(ULTRASONIC_TRIGGER, OUTPUT);
+  pinMode(ULTRASONIC_ECHO, INPUT);
+  pinMode(ULTRASONIC_TRIGGER, OUTPUT);
 
-    keypad.begin();
-    digitalWrite(RED_LED, LOW);
-    digitalWrite(GREEN_LED, HIGH);
+  keypad.begin();
+  close();
 }
 
 void loop()
 {
-    keypad.scan();
-    char value = keypad.readAscii();
+  keypad.scan();
+  char value = keypad.readAscii();
 
-    if(isDigit(value))
+  // Check if the pressed key is a digit and adds it to the password
+  if(isDigit(value))
+  {
+    password += value;
+    keysPressed++;
+  }
+
+  // Check if the password is complete
+  if(keysPressed == PASSWORD_LENGTH)
+  {
+    // Check if the password is correct and opens the door
+    if(password.toInt() == PASSWORD)
     {
-        password += value;
-        keysPressed++;
+      digitalWrite(RED_LED, LOW);
+      digitalWrite(GREEN_LED, LOW);
+      delay(1000);
+      pressedTime = millis();
     }
-
-    if(keysPressed == PASSWORD_LENGTH)
-    {
-        if(password.toInt() == PASSWORD)
-        {
-            digitalWrite(RED_LED, LOW);
-            digitalWrite(GREEN_LED, LOW);
-            delay(1000);
-            pressedTime = millis();
-        }
-        else
-        {
-            digitalWrite(RED_LED, LOW);
-            for(int i = 0; i < 3; i++)
-            {
-                digitalWrite(GREEN_LED, LOW);
-                delay(1000);
-                digitalWrite(GREEN_LED, HIGH);
-                delay(1000);
-            }
-        }
-
-        password = "";
-        keysPressed = 0;
-    }
-
-    if(calculateDistance() < 10 && pressedTime != 0)
-    {
-        pressedTime = millis();
-    }
-
-    if(value == 'C' || (millis() - pressedTime >= 5000 && pressedTime != 0))
-    {
-        if(calculateDistance() >= 10)
-        {
-            pressedTime = 0;
-        }
-    }
-
-    if (pressedTime != 0)
-    {
-        digitalWrite(RED_LED, HIGH);
-        digitalWrite(GREEN_LED, LOW);
-    }
+    // If the password is incorrect, blinks the green led
     else
-    {
-        digitalWrite(RED_LED, LOW);
-        digitalWrite(GREEN_LED, HIGH);
-    }
+      ledBlink();
+
+    password = "";
+    keysPressed = 0;
+  }
+
+  if(calculateDistance() < 10 && pressedTime != 0)
+    pressedTime = millis();
+
+  if(value == 'C' || (millis() - pressedTime >= 5000 && pressedTime != 0))
+  {
+    if(calculateDistance() >= 10)
+      pressedTime = 0;
+  }
+
+  if (pressedTime != 0)
+    open();
+  else
+    close();
 }
 
 float calculateDistance()
 {
-    digitalWrite(ULTRASONIC_TRIGGER, LOW);
-    delayMicroseconds(2);
+  digitalWrite(ULTRASONIC_TRIGGER, LOW);
+  delayMicroseconds(2);
 
-    digitalWrite(ULTRASONIC_TRIGGER, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(ULTRASONIC_TRIGGER, LOW);
+  digitalWrite(ULTRASONIC_TRIGGER, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(ULTRASONIC_TRIGGER, LOW);
 
-    unsigned long duration = pulseIn(ULTRASONIC_ECHO, HIGH);
+  unsigned long duration = pulseIn(ULTRASONIC_ECHO, HIGH);
 
-    float distance = (duration * 0.0343) / 2;
+  float distance = (duration * 0.0343) / 2;
 
-    return distance;
+  return distance;
+}
+
+void open()
+{
+  digitalWrite(RED_LED, HIGH);
+  digitalWrite(GREEN_LED, LOW);
+}
+
+void close()
+{
+  digitalWrite(RED_LED, LOW);
+  digitalWrite(GREEN_LED, HIGH);
+}
+
+void ledBlink()
+{
+  digitalWrite(RED_LED, LOW);
+  for(int i = 0; i < 3; i++)
+  {
+    digitalWrite(GREEN_LED, LOW);
+    delay(1000);
+    digitalWrite(GREEN_LED, HIGH);
+    delay(1000);
+  }
 }

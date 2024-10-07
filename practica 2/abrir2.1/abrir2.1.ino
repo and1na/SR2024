@@ -26,36 +26,44 @@ Keypad keypad(COLUMN_1, COLUMN_2, COLUMN_3, COLUMN_4, ROW_1, ROW_2, ROW_3, ROW_4
 
 void setup()
 {
-    pinMode(RED_LED, OUTPUT);
-    pinMode(GREEN_LED, OUTPUT);
+  pinMode(RED_LED, OUTPUT);
+  pinMode(GREEN_LED, OUTPUT);
 
-    pinMode(COLUMN_1, INPUT);
-    pinMode(COLUMN_2, INPUT);
-    pinMode(COLUMN_3, INPUT);
-    pinMode(COLUMN_4, INPUT);
+  pinMode(COLUMN_1, INPUT);
+  pinMode(COLUMN_2, INPUT);
+  pinMode(COLUMN_3, INPUT);
+  pinMode(COLUMN_4, INPUT);
 
-    pinMode(ROW_1, INPUT);
-    pinMode(ROW_2, INPUT);
-    pinMode(ROW_3, INPUT);
-    pinMode(ROW_4, INPUT);
+  pinMode(ROW_1, INPUT);
+  pinMode(ROW_2, INPUT);
+  pinMode(ROW_3, INPUT);
+  pinMode(ROW_4, INPUT);
 
-    keypad.begin();
+  keypad.begin();
 
-    digitalWrite(RED_LED, LOW);
-    digitalWrite(GREEN_LED, HIGH);
+  close();
 }
 
 void loop()
 {
-    char value = keypad.readBlocking();
+  char value = keypad.readBlocking();
 
-    if(Keypad::convertToAscii(value) == 'A')
-    {
-        digitalWrite(RED_LED, HIGH);
-        digitalWrite(GREEN_LED, LOW);
-        delay(5000);
-    }
+  if(Keypad::convertToAscii(value) == 'A')
+  {
+    open();
+    delay(5000);
+  }
+  close();
+}
 
-    digitalWrite(RED_LED, LOW);
-    digitalWrite(GREEN_LED, HIGH);
+void open()
+{
+  digitalWrite(RED_LED, HIGH);
+  digitalWrite(GREEN_LED, LOW);
+}
+
+void close()
+{
+  digitalWrite(RED_LED, LOW);
+  digitalWrite(GREEN_LED, HIGH);
 }
